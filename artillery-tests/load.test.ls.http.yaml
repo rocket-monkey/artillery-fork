@@ -1,0 +1,65 @@
+# How this was setup:
+
+config:
+  target: "http://dev-zh-126:3000/de/LiveShopping/65"
+  phases:
+    - duration: 10
+      arrivalRate: 1
+    # - duration: 120
+    #   arrivalRate: 5
+    #   rampTo: 50
+    # - duration: 600
+    #   arrivalRate: 50
+scenarios:
+  - name: "Make the initial GQL Posts to load all data the client will render on /de/LiveShopping/<id>"
+    flow:
+      - post:
+          url: "http://dev-zh-126:4000/api/graphql"
+          headers:
+            content-type: "application/json"
+            X-Dg-LoginStatus: "loggedOut"
+            Origin: "http://artillery-load-test"
+            X-Dg-Country: "ch"
+            Accept-Language: "de-CH"
+            X-Dg-Portal: "22"
+            X-Dg-CustomerType: "standard"
+            X-Dg-Mandator: "406802"
+          body: "[{\"operationName\":\"GET_LIVESHOPPINGS\",\"variables\":{\"liveShoppingId\":\"61\"},\"query\":\"query GET_LIVESHOPPINGS($liveShoppingId: Int) {\\n  liveShoppings(liveShoppingId: $liveShoppingId) {\\n    date\\n    header {\\n      title\\n      imageUrl\\n      description\\n      __typename\\n    }\\n    activityRow {\\n      articlesSold\\n      nextLiveShoppingDate\\n      __typename\\n    }\\n    liveShoppings {\\n      product {\\n        ...Product\\n        __typename\\n      }\\n      isPopular\\n      isEndingSoon\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment Product on Product {\\n  id\\n  productTypeId\\n  productTypeName\\n  imageUrl\\n  imageSet {\\n    alternateText\\n    source\\n    __typename\\n  }\\n  sectorId\\n  name\\n  brandId\\n  brandName\\n  fullName\\n  productConditionLabel\\n  marketingDescription\\n  pricing {\\n    supplierId\\n    secondHandSalesOfferId\\n    price {\\n      ...VatMoneySum\\n      __typename\\n    }\\n    priceRebateFraction\\n    insteadOfPrice {\\n      type\\n      price {\\n        ...VatMoneySum\\n        __typename\\n      }\\n      __typename\\n    }\\n    offerType\\n    __typename\\n  }\\n  availability {\\n    icon\\n    mail {\\n      siteId\\n      title\\n      type\\n      icon\\n      text\\n      description\\n      tooltipDescription\\n      numberOfItems\\n      deliveryDate\\n      __typename\\n    }\\n    pickup {\\n      title\\n      notAllowedText\\n      description\\n      isAllowed\\n      __typename\\n    }\\n    pickMup {\\n      description\\n      isAllowed\\n      __typename\\n    }\\n    sites {\\n      siteId\\n      title\\n      type\\n      icon\\n      text\\n      description\\n      tooltipDescription\\n      numberOfItems\\n      deliveryDate\\n      __typename\\n    }\\n    isFloorDeliveryAllowed\\n    __typename\\n  }\\n  energyEfficiency {\\n    energyEfficiencyColorType\\n    energyEfficiencyLabelText\\n    energyEfficiencyLabelSigns\\n    energyEfficiencyImageUrl\\n    __typename\\n  }\\n  salesInformation {\\n    numberOfItems\\n    numberOfItemsSold\\n    isLowAmountRemaining\\n    __typename\\n  }\\n  showroomSites\\n  rating\\n  totalRatings\\n  isIncentiveCashback\\n  incentiveText\\n  isNew\\n  isBestseller\\n  isProductSet\\n  isSalesPromotion\\n  isComparable\\n  isDeleted\\n  canAddToBasket\\n  hidePrice\\n  germanNames {\\n    germanProductTypeName\\n    nameWithoutProperties\\n    germanProductNameProperties\\n    germanNameWithBrand\\n    __typename\\n  }\\n  productGroups {\\n    productGroup1\\n    productGroup2\\n    productGroup3\\n    productGroup4\\n    __typename\\n  }\\n  __typename\\n}\\n\\nfragment VatMoneySum on VatMoneySum {\\n  amountIncl\\n  amountExcl\\n  currency\\n  __typename\\n}\\n\"},{\"operationName\":\"GET_SOCIAL_SHOPPINGS\",\"variables\":{\"take\":5,\"latest\":null},\"query\":\"query GET_SOCIAL_SHOPPINGS($take: Int, $latest: String) {\\n  socialShopping(take: $take, latest: $latest) {\\n    latestTransactionTimeStamp\\n    items {\\n      id\\n      userName\\n      cityName\\n      dateTime\\n      brandName\\n      fullProductName\\n      salesPrice {\\n        ...VatMoneySum\\n        __typename\\n      }\\n      oAuthProviderName\\n      targetUserName\\n      quote\\n      voteTypeId\\n      productTypeName\\n      socialShoppingTransactionTypeId\\n      url\\n      rating\\n      searchString\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment VatMoneySum on VatMoneySum {\\n  amountIncl\\n  amountExcl\\n  currency\\n  __typename\\n}\\n\"},{\"operationName\":\"GET_TRANSLATIONS\",\"variables\":{\"culture\":\"de-CH\",\"keys\":[\"To next offer of the day\"]},\"query\":\"query GET_TRANSLATIONS($culture: String!, $keys: [String!]) {\\n  translations(culture: $culture, keys: $keys) {\\n    translations {\\n      id\\n      value\\n      key\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"}]"
+          capture:
+            json: "$[0].data"
+            as: "data"
+      - log: "GQL Data: {{ data }}"
+      - post:
+          url: "http://dev-zh-126:4000/api/graphql"
+          headers:
+            content-type: "application/json"
+            X-Dg-LoginStatus: "loggedOut"
+            Origin: "http://artillery-load-test"
+            X-Dg-Country: "ch"
+            Accept-Language: "de-CH"
+            X-Dg-Portal: "22"
+            X-Dg-CustomerType: "standard"
+            X-Dg-Mandator: "406802"
+          body: "[{\"operationName\":\"GET_TRANSLATIONS\",\"variables\":{\"culture\":\"de-CH\",\"keys\":[\"[0] is taking part in a discussion about the [1]: [2]\"]},\"query\":\"query GET_TRANSLATIONS($culture: String!, $keys: [String!]) {\\n  translations(culture: $culture, keys: $keys) {\\n    translations {\\n      id\\n      value\\n      key\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"},{\"operationName\":\"GET_TRANSLATIONS\",\"variables\":{\"culture\":\"de-CH\",\"keys\":[\"[0] for [1] was sent to [2] in [3]\"]},\"query\":\"query GET_TRANSLATIONS($culture: String!, $keys: [String!]) {\\n  translations(culture: $culture, keys: $keys) {\\n    translations {\\n      id\\n      value\\n      key\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"},{\"operationName\":\"GET_TRANSLATIONS\",\"variables\":{\"culture\":\"de-CH\",\"keys\":[\"[0] is starting a [1] discussion about [2]: [3]\"]},\"query\":\"query GET_TRANSLATIONS($culture: String!, $keys: [String!]) {\\n  translations(culture: $culture, keys: $keys) {\\n    translations {\\n      id\\n      value\\n      key\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"},{\"operationName\":\"GET_TRANSLATIONS\",\"variables\":{\"culture\":\"de-CH\",\"keys\":[\"[0] from [1] ordered [2] for [3]\"]},\"query\":\"query GET_TRANSLATIONS($culture: String!, $keys: [String!]) {\\n  translations(culture: $culture, keys: $keys) {\\n    translations {\\n      id\\n      value\\n      key\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\"}]"
+          capture:
+            json: "$[0].data"
+            as: "data"
+      - log: "GQL Data: {{ data }}"
+      - think: 2
+      - post:
+          url: "http://dev-zh-126:4000/api/graphql"
+          headers:
+            content-type: "application/json"
+            X-Dg-LoginStatus: "loggedOut"
+            Origin: "http://artillery-load-test"
+            X-Dg-Country: "ch"
+            Accept-Language: "de-CH"
+            X-Dg-Portal: "22"
+            X-Dg-CustomerType: "standard"
+            X-Dg-Mandator: "406802"
+          body: "[{\"operationName\":\"GET_SOCIAL_SHOPPINGS\",\"variables\":{\"take\":5,\"latest\":\"1531147295\"},\"query\":\"query GET_SOCIAL_SHOPPINGS($take: Int, $latest: String) {\\n  socialShopping(take: $take, latest: $latest) {\\n    latestTransactionTimeStamp\\n    items {\\n      id\\n      userName\\n      cityName\\n      dateTime\\n      brandName\\n      fullProductName\\n      salesPrice {\\n        ...VatMoneySum\\n        __typename\\n      }\\n      oAuthProviderName\\n      targetUserName\\n      quote\\n      voteTypeId\\n      productTypeName\\n      socialShoppingTransactionTypeId\\n      url\\n      rating\\n      searchString\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment VatMoneySum on VatMoneySum {\\n  amountIncl\\n  amountExcl\\n  currency\\n  __typename\\n}\\n\"}]"
+          capture:
+            json: "$[0].data"
+            as: "data"
+      - log: "GQL Data: {{ data }}"
+      - think: 3

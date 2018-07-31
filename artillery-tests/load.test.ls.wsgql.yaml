@@ -1,0 +1,21 @@
+# simple-socketio-load-test.yaml
+config:
+  target: "ws://localhost:4001/api/subscriptions"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+    - duration: 120
+      arrivalRate: 5
+      rampTo: 4000
+    - duration: 600
+      arrivalRate: 50
+  ws:
+      # Ignore SSL certificate errors
+      # - useful in *development* with self-signed certs
+      # rejectUnauthorized: false
+scenarios:
+    - engine: "wsgql"
+      flow:
+        - send: {"id":"1","type":"start","payload":{"query":"subscription {\n socialShopping {\n    items {\n      id\n      userName\n      cityName\n      dateTime\n      brandName\n      fullProductName\n      salesPrice {\n        amountIncl\n        amountExcl\n        currency\n      }\n      oAuthProviderName\n      targetUserName\n      quote\n      voteTypeId\n      productTypeName\n      socialShoppingTransactionTypeId\n      url\n      isVisible\n      rating\n      searchString\n    }\n  }\n}","variables":null}}
+        - think: 200
+        - send: {"id":"1","type":"end"}
